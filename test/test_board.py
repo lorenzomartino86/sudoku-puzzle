@@ -59,6 +59,25 @@ class TestBoard(TestCase):
         board = Board(grid)
         values = board.grid_values()
         values = board.reduce_puzzle(values)
+        self.assertEqual(values['A1'], '4')
+        self.assertEqual(values['B1'], '9')
+        self.assertEqual(values['C1'], '2')
+        self.assertEqual(values['D1'], '5')
+        self.assertEqual(values['E1'], '7')
+        self.assertEqual(values['F1'], '1')
+        self.assertEqual(values['G1'], '3')
+        self.assertEqual(values['H1'], '8')
+        self.assertEqual(values['I1'], '6')
+
+    def test_harder_sudoku(self):
+        """
+         test to assert that with a harder sudoku grid the algorithm is not enouth to solve this 
+         kind of problem
+        """
+        grid2 = '4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......'
+        board = Board(grid2)
+        values = board.grid_values()
+        values = board.reduce_puzzle(values)
         board.show(values)
         self.assertEqual(values['A1'], '4')
         self.assertEqual(values['B1'], '9')
@@ -69,6 +88,7 @@ class TestBoard(TestCase):
         self.assertEqual(values['G1'], '3')
         self.assertEqual(values['H1'], '8')
         self.assertEqual(values['I1'], '6')
+
 
 
 

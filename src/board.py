@@ -77,7 +77,7 @@ class Board(object):
         """
         
         :param values: Sudoku grid as dict type
-        :return: 
+        :return: resolved Sudoku in dictionary form
         """
         stalled = False
         while not stalled:
@@ -98,6 +98,9 @@ class Board(object):
             if len([box for box in values.keys() if len(values[box]) == 0]):
                 return False
         return values
+
+    def search(self):
+        pass
 
     def show(self, values):
         """
