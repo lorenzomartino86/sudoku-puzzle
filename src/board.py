@@ -99,8 +99,32 @@ class Board(object):
                 return False
         return values
 
-    def search(self):
-        pass
+    def search(self, values):
+        "Using depth-first search and propagation, create a search tree and solve the sudoku."
+        # First, reduce the puzzle using the previous function
+        reduced_puzzle = self.reduce_puzzle(values)
+        if reduced_puzzle is False:
+            return False
+
+        if self.__all_box_assigned(values):
+            return values
+
+        # Choose one of the unfilled squares with the fewest possibilities
+        number_of_possibilities = lambda digit: len(digit)
+
+        frequencies = dict((box, number_of_possibilities(digit))
+               for (box, digit) in values.items()
+                       if len(digit) > 1)
+        best_unfilled_box = min(frequencies.keys(), key=(lambda box: frequencies[box]))
+
+        # Now use recursion to solve each one of the resulting sudokus,
+        # and if one returns a value (not False), return that answer!
+        for digit in values[best_unfilled_box]:
+            recursive_values = values.copy()
+            recursive_values[best_unfilled_box] = digit
+            answer = self.search(recursive_values)
+            if answer:
+                return answer
 
     def show(self, values):
         """
@@ -174,3 +198,9 @@ class Board(object):
             for digit in list(values[box]):
                 digit_frequencies.setdefault(digit, []).append(box)
         return digit_frequencies
+
+    def __all_box_assigned(self, values):
+        for box in values:
+            if len(values[box]) > 1:
+                return False
+        return True
