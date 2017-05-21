@@ -13,6 +13,9 @@ class Board(object):
         self.square_units = [Helper.cross(row_square, column_square)
                              for row_square in ('ABC', 'DEF', 'GHI')
                              for column_square in ('123', '456', '789')]
+        unitlist = self.row_units + self.column_units + self.square_units
+        units = dict((s, [u for u in unitlist if s in u]) for s in self.boxes)
+        self.peers = dict((s, set(sum(units[s],[]))-set([s])) for s in self.boxes)
         self.__build_grid(grid)
 
     def grid_values(self):
@@ -22,13 +25,13 @@ class Board(object):
             - keys: Box labels, e.g. 'A1'
             - values: Value in corresponding box, e.g. '8', or '123456789' if it is empty.
         """
-        for key in self.grid_dict:
-            value = self.grid_dict[key]
+        for key in self.grid:
+            value = self.grid[key]
             if value == self.placeholder:
-                self.grid_dict[key] = self.columns
+                self.grid[key] = self.columns
             else:
-                self.grid_dict[key] = value
-        return self.grid_dict
+                self.grid[key] = value
+        return self.grid
 
     def eliminate(self):
         """Eliminate values from peers of each box with a single value.
@@ -41,9 +44,13 @@ class Board(object):
         Returns:
             Resulting Sudoku in dictionary form after eliminating values.
         """
-        for box in self.grid_dict:
-            peers = self.__retrieve_peers(box)
-            self.__eliminate(box, peers)
+        for box in self.grid:
+            for peer in self.peers[box]:
+                peer_digit = self.initial_grid[peer]
+                if self.__is_not_same_box(box, peer) \
+                        and self.__is_not_all_digits(peer_digit) \
+                        and self.__has_an_assigned_value(peer_digit):
+                    self.grid[box] = self.grid[box].replace(peer_digit, "")
 
 
     def show(self):
@@ -52,10 +59,10 @@ class Board(object):
         Input: The sudoku in dictionary form
         Output: None
         """
-        width = 1 + max(len(self.grid_dict[s]) for s in self.boxes)
+        width = 1 + max(len(self.grid[s]) for s in self.boxes)
         line = '+'.join(['-' * (width * 3)] * 3)
         for r in self.rows:
-            print(''.join(self.grid_dict[r + c].center(width) + ('|' if c in '36' else '')
+            print(''.join(self.grid[r + c].center(width) + ('|' if c in '36' else '')
                           for c in self.columns))
             if r in 'CF': print(line)
         return
@@ -82,44 +89,20 @@ class Board(object):
                    - keys: Box labels, e.g. 'A1'
                    - values: Value in corresponding box, e.g. '8', or '123456789' if it is empty.
                """
-        self.grid_dict = {}
+        self.grid = {}
         assert grid is not None, "grid should be defined"
         assert len(grid) is 81, "grid should have 81 digits"
         item_index = 0
         for item in grid:
             self.__validate(item)
             box = self.boxes[item_index]
-            self.grid_dict[box] = item
+            self.grid[box] = item
             item_index = item_index + 1
+        self.initial_grid = self.grid.copy()
 
     def __validate(self, item):
         if item not in (str(value) for value in range(1, 10)) and item != self.placeholder:
             raise ValueError("grid contains a not valid value: " + item)
-
-    def __retrieve_peers(self, box):
-        peers = []
-        for row in self.row_units:
-            if box in row:
-                peers.append(row)
-        for column in self.column_units:
-            if box in column:
-                peers.append(column)
-        for square in self.square_units:
-            if box in square:
-                peers.append(square)
-        return peers
-
-    def __eliminate(self, box, peers):
-        for peer in peers:
-            for peer_box in peer:
-                box_value = self.grid_dict[box]
-                peer_value = self.grid_dict[peer_box]
-                if self.__is_not_same_box(box, peer_box) \
-                        and self.__is_contained(box_value, peer_value)\
-                        and self.__is_not_all_digits(peer_value)\
-                        and self.__has_an_assigned_value(peer_value):
-                    self.grid_dict[box] = box_value.replace(peer_value, "")
-
 
     def __is_contained(self, box_value, peer_value):
         return peer_value in box_value

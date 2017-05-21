@@ -43,11 +43,14 @@ class TestBoard(TestCase):
         board = Board(grid)
         board.grid_values()
         board.eliminate()
-        grid_dict = board.grid_dict
+        grid_dict = board.grid
         self.assertEqual(grid_dict['A1'], '45')
         self.assertEqual(grid_dict['A3'], '3')
-        #self.assertEqual(grid_dict['E8'], '13456')
-        print(board.show())
+        self.assertEqual(grid_dict['E8'], '13456')
+        self.assertEqual(grid_dict['E3'], '49')
+        self.assertEqual(grid_dict['I4'], '4')
+        self.assertEqual(grid_dict['I5'], '1')
+        self.assertEqual(grid_dict['B7'], '78')
 
 
 
