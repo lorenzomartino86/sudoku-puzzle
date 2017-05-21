@@ -41,27 +41,36 @@ class TestBoard(TestCase):
         grid = '..3.2.6..9..3.5..1..18.64....81.29..7.......' \
                '8..67.82....26.95..8..2.3..9..5.1.3..'
         board = Board(grid)
-        board.grid_values()
-        board.eliminate()
-        grid_dict = board.grid
-        self.assertEqual(grid_dict['A1'], '45')
-        self.assertEqual(grid_dict['A3'], '3')
-        self.assertEqual(grid_dict['E8'], '13456')
-        self.assertEqual(grid_dict['E3'], '49')
-        self.assertEqual(grid_dict['I4'], '4')
-        self.assertEqual(grid_dict['I5'], '1')
-        self.assertEqual(grid_dict['B7'], '78')
+        values = board.grid_values()
+        values = board.eliminate(values)
+        self.assertEqual(values['A1'], '45')
 
     def test_only_choice(self):
         grid = '..3.2.6..9..3.5..1..18.64....81.29..7.......' \
                '8..67.82....26.95..8..2.3..9..5.1.3..'
         board = Board(grid)
-        board.grid_values()
-        board.eliminate()
-        board.only_choice()
-        board.only_choice()
-        board.only_choice()
-        board.show()
+        values = board.grid_values()
+        values = board.eliminate(values)
+        values = board.only_choice(values)
+        self.assertEqual(values['A1'], '45')
+
+    def test_reduce_puzzle(self):
+        grid = '..3.2.6..9..3.5..1..18.64....81.29..7.......' \
+               '8..67.82....26.95..8..2.3..9..5.1.3..'
+        board = Board(grid)
+        values = board.grid_values()
+        values = board.reduce_puzzle(values)
+        self.assertEqual(values['A1'], '4')
+        self.assertEqual(values['B1'], '9')
+        self.assertEqual(values['C1'], '2')
+        self.assertEqual(values['D1'], '5')
+        self.assertEqual(values['E1'], '7')
+        self.assertEqual(values['F1'], '1')
+        self.assertEqual(values['G1'], '3')
+        self.assertEqual(values['H1'], '8')
+        self.assertEqual(values['I1'], '6')
+        self.assertEqual(values['H1'], '6')
+        board.show(values)
 
 
 
