@@ -13,9 +13,9 @@ class Board(object):
         self.square_units = [Helper.cross(row_square, column_square)
                              for row_square in ('ABC', 'DEF', 'GHI')
                              for column_square in ('123', '456', '789')]
-        unitlist = self.row_units + self.column_units + self.square_units
-        units = dict((s, [u for u in unitlist if s in u]) for s in self.boxes)
-        self.peers = dict((s, set(sum(units[s],[]))-set([s])) for s in self.boxes)
+        self.unitlist = self.row_units + self.column_units + self.square_units
+        self.units = dict((s, [u for u in self.unitlist if s in u]) for s in self.boxes)
+        self.peers = dict((s, set(sum(self.units[s], [])) - set([s])) for s in self.boxes)
         self.__build_grid(grid)
 
     def grid_values(self):
@@ -52,6 +52,23 @@ class Board(object):
                         and self.__has_an_assigned_value(peer_digit):
                     self.grid[box] = self.grid[box].replace(peer_digit, "")
 
+    def only_choice(self):
+        """Finalize all values that are the only choice for a unit.
+
+        Go through all the units, and whenever there is a unit with a value
+        that only fits in one box, assign the value to this box.
+
+        Input: Sudoku in dictionary form.
+        Output: Resulting Sudoku in dictionary form after filling in only choices.
+        """
+        for unit in self.unitlist:
+            digit_frequencies = self.__get_digit_frequencies(unit)
+            unique_digit_box = {digit: frequency
+                                    for digit, frequency in digit_frequencies.items()
+                                                    if len(frequency) == 1}
+            for update_digit, update_box in unique_digit_box.items():
+                self.grid[update_box[0]] = update_digit
+                print ("updated ", update_box[0], " with ", update_digit)
 
     def show(self):
         """
@@ -78,6 +95,9 @@ class Board(object):
 
     def get_square_units(self):
         return self.square_units
+
+    def get_undefined_boxes(self, square):
+        return [box for box in square if not self.__has_an_assigned_value(self.grid[box])]
 
     def __build_grid(self, grid):
         """Convert grid string into {<box>: <value>} dict with '123456789' value for empties.
@@ -115,3 +135,10 @@ class Board(object):
 
     def __is_not_same_box(self, first_box, second_box):
         return first_box != second_box
+
+    def __get_digit_frequencies(self, boxes):
+        digit_frequencies = {}
+        for box in boxes:
+            for digit in list(self.grid[box]):
+                digit_frequencies.setdefault(digit, []).append(box)
+        return digit_frequencies
