@@ -3,7 +3,6 @@ from src.helper import Helper
 
 
 class Board(object):
-
     def __init__(self, grid=None):
         self.rows = 'ABCDEFGHI'
         self.columns = '123456789'
@@ -14,8 +13,7 @@ class Board(object):
         self.square_units = [Helper.cross(row_square, column_square)
                              for row_square in ('ABC', 'DEF', 'GHI')
                              for column_square in ('123', '456', '789')]
-        self._build_grid(grid)
-
+        self.__build_grid(grid)
 
     def grid_values(self):
         """
@@ -24,17 +22,28 @@ class Board(object):
             - keys: Box labels, e.g. 'A1'
             - values: Value in corresponding box, e.g. '8', or '123456789' if it is empty.
         """
-        all_digits = '123456789'
-        self.grid_correspondences = {}
         for key in self.grid_dict:
             value = self.grid_dict[key]
             if value == self.placeholder:
-                self.grid_correspondences[key] = all_digits
+                self.grid_dict[key] = self.columns
             else:
-                self.grid_correspondences[key] = value
-        return self.grid_correspondences
+                self.grid_dict[key] = value
+        return self.grid_dict
 
+    def eliminate(self):
+        """Eliminate values from peers of each box with a single value.
 
+        Go through all the boxes, and whenever there is a box with a single value,
+        eliminate this value from the set of values of all its peers.
+
+        Args:
+            values: Sudoku in dictionary form.
+        Returns:
+            Resulting Sudoku in dictionary form after eliminating values.
+        """
+        for box in self.grid_dict:
+            peers = self.__retrieve_peers(box)
+            self.__eliminate(box, peers)
 
 
     def show(self):
@@ -63,7 +72,7 @@ class Board(object):
     def get_square_units(self):
         return self.square_units
 
-    def _build_grid(self, grid):
+    def __build_grid(self, grid):
         """Convert grid string into {<box>: <value>} dict with '123456789' value for empties.
 
                Args:
@@ -78,11 +87,48 @@ class Board(object):
         assert len(grid) is 81, "grid should have 81 digits"
         item_index = 0
         for item in grid:
-            self._validate(item)
+            self.__validate(item)
             box = self.boxes[item_index]
             self.grid_dict[box] = item
             item_index = item_index + 1
 
-    def _validate(self, item):
+    def __validate(self, item):
         if item not in (str(value) for value in range(1, 10)) and item != self.placeholder:
             raise ValueError("grid contains a not valid value: " + item)
+
+    def __retrieve_peers(self, box):
+        peers = []
+        for row in self.row_units:
+            if box in row:
+                peers.append(row)
+        for column in self.column_units:
+            if box in column:
+                peers.append(column)
+        for square in self.square_units:
+            if box in square:
+                peers.append(square)
+        return peers
+
+    def __eliminate(self, box, peers):
+        for peer in peers:
+            for peer_box in peer:
+                box_value = self.grid_dict[box]
+                peer_value = self.grid_dict[peer_box]
+                if self.__is_not_same_box(box, peer_box) \
+                        and self.__is_contained(box_value, peer_value)\
+                        and self.__is_not_all_digits(peer_value)\
+                        and self.__has_an_assigned_value(peer_value):
+                    self.grid_dict[box] = box_value.replace(peer_value, "")
+
+
+    def __is_contained(self, box_value, peer_value):
+        return peer_value in box_value
+
+    def __is_not_all_digits(self, value):
+        return value != self.columns
+
+    def __has_an_assigned_value(self, value):
+        return len(value) == 1
+
+    def __is_not_same_box(self, first_box, second_box):
+        return first_box != second_box

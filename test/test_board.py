@@ -37,6 +37,19 @@ class TestBoard(TestCase):
         self.assertEqual(correspondences['A1'], '123456789')
         self.assertEqual(correspondences['A3'], '3')
 
+    def test_eliminate(self):
+        grid = '..3.2.6..9..3.5..1..18.64....81.29..7.......' \
+               '8..67.82....26.95..8..2.3..9..5.1.3..'
+        board = Board(grid)
+        board.grid_values()
+        board.eliminate()
+        grid_dict = board.grid_dict
+        self.assertEqual(grid_dict['A1'], '45')
+        self.assertEqual(grid_dict['A3'], '3')
+        #self.assertEqual(grid_dict['E8'], '13456')
+        print(board.show())
+
+
 
 if __name__ == '__main__':
     unittest.main()
