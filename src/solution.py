@@ -123,7 +123,8 @@ def eliminate(values):
         for peer in peers[box]:
             peer_digit = values[peer]
             if box != peer and peer_digit != columns \
-                and len(peer_digit) == 1:
+                and len(peer_digit) == 1 \
+                and len(values[box]) > 1:
                 values[box] = values[box].replace(peer_digit, "")
     return values
 
@@ -227,16 +228,16 @@ def solve(grid):
     # solver
     values = search(values)
 
-    # display solved sudoku
-    display(values)
+    # display solved sudoku if solved
+    if values:
+        display(values)
 
     return values
 
-
 if __name__ == '__main__':
-    grid = '..3.2.6..9..3.5..1..18.64....81.29..7.......' \
-           '8..67.82....26.95..8..2.3..9..5.1.3..'
-    solve(grid)
+    complex_diagonal_grid = '.1....9...8...2.379....7....58.....................62....6....229.1...6...6....1.'
+
+    print(solve(complex_diagonal_grid))
 
     try:
         from visualize import visualize_assignments
