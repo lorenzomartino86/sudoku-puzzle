@@ -123,8 +123,7 @@ def eliminate(values):
         for peer in peers[box]:
             peer_digit = values[peer]
             if box != peer and peer_digit != columns \
-                and len(peer_digit) == 1 \
-                and len(values[box]) > 1:
+                and len(peer_digit) == 1:
                 values[box] = values[box].replace(peer_digit, "")
     return values
 
@@ -234,10 +233,20 @@ def solve(grid):
 
     return values
 
-if __name__ == '__main__':
-    complex_diagonal_grid = '.1....9...8...2.379....7....58.....................62....6....229.1...6...6....1.'
+def check_solution(values):
+    for unit in unitlist:
+        checked_value = list()
+        for box in unit:
+            if values[box] in checked_value:
+                return False
+            checked_value.append(values[box])
+    return True
 
-    print(solve(complex_diagonal_grid))
+
+if __name__ == '__main__':
+    complex_diagonal_grid = '9.1....8.8.5.7..4.2.4....6...7......5..............83.3..6......9................'
+    solution = solve(complex_diagonal_grid)
+    print("Solution is correct" if check_solution(solution) else "Solution is wrong")
 
     try:
         from visualize import visualize_assignments
