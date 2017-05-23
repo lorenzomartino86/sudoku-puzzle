@@ -126,6 +126,36 @@ class Board(object):
             if answer:
                 return answer
 
+    def naked_twins(self, values):
+        """Eliminate values using the naked twins strategy.
+        Args:
+            values(dict): a dictionary of the form {'box_name': '123456789', ...}
+
+        Returns:
+            the values dictionary with the naked twins eliminated from peers.
+        """
+        self.show(values)
+
+        if self.__all_box_assigned(values):
+            return values
+
+        values = self.eliminate(values)
+
+        # Find all instances of naked twins
+        twins_list = self.__all_naked_twins(values)
+        print ("\n\ntwins --> ", twins_list, "\n\n")
+
+        # Eliminate the naked twins as possibilities for their peers
+        for twins in twins_list:
+            digits = values[twins[0]]
+            values = self.__eliminate_values_from_peers(twins, digits, values)
+
+        return self.naked_twins(values)
+
+
+
+
+
     def show(self, values):
         """
         Display the values as a 2-D grid.
@@ -204,3 +234,45 @@ class Board(object):
             if len(values[box]) > 1:
                 return False
         return True
+
+    def __all_naked_twins(self, values):
+        twins = {}
+        two_digits_boxes = [(box, values[box]) for box in values if len(values[box]) == 2]
+        for box, value in two_digits_boxes:
+            for unit in self.units[box]:
+                box_unit_list = [box_unit for box_unit in unit
+                                 if box_unit != box and values[box_unit] == value]
+
+                for twin in box_unit_list:
+                    twins.setdefault(value, list())
+                    twins[value].append(twin)
+                    #print("added ", twin, values[twin], box, value)
+
+        twins = list(boxes for boxes in twins.values()
+                     if len(boxes) == 2)
+        return twins
+
+    def __eliminate_values_from_peers(self, twins, digits_to_be_removed, values):
+        digits_to_be_removed = list(digits_to_be_removed)
+        boxA = twins[0]
+        boxB = twins[1]
+        for peer in self.peers[boxA]:
+            if peer != boxB and len(values[peer]) > 1:
+                for digit in values[peer]:
+                    if digit in digits_to_be_removed:
+                        print ("removing ", digit, " from ", peer)
+                        values[peer].replace(digit, '')
+
+        for peer in self.peers[boxB]:
+            if peer != boxA and len(values[peer]) > 1:
+                for digit in values[peer]:
+                    if digit in digits_to_be_removed:
+                        print("removing ", digit, " from ", peer)
+                        values[peer].replace(digit, '')
+        return values
+
+
+
+
+
+

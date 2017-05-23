@@ -97,7 +97,17 @@ class TestBoard(TestCase):
         board = Board(grid2)
         values = board.grid_values()
         values = board.search(values)
-        board.show(values)
+
+    def test_naked_twins(self):
+        """
+         test to assert that with a harder sudoku grid the algorithm is not enouth to solve this 
+         kind of problem
+        """
+        grid = '..3.2.6..9..3.5..1..18.64....81.29..7.......' \
+               '8..67.82....26.95..8..2.3..9..5.1.3..'
+        board = Board(grid)
+        values = board.grid_values()
+        values = board.naked_twins(values)
 
 
 
