@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 assignments = []
 
 def cross(A, B):
@@ -61,19 +63,21 @@ def naked_twins(values):
     # Find all instances of naked twins
     for unit in unitlist:
         possible_twins = [(box, values[box]) for box in unit if len(values[box]) == 2]
-        if len(possible_twins) == 2:
-            possible_twins_dict = {}
-            for box, digit in possible_twins:
-                if not possible_twins_dict.get(digit):
-                    possible_twins_dict[digit] = list()
-                possible_twins_dict[digit].append(box)
-            for digits, twins in possible_twins_dict.items():
-                if len(twins) == 2:
-                    for box in unit:
-                        if box not in twins:
-                            for digit in digits:
-                                if digit in values[box] and len(values[box]) > 1:
-                                    values[box] = values[box].replace(digit, '')
+        if len(possible_twins) >= 2:
+            twins_by_digit = defaultdict(list)
+            for box, digit in possible_twins: twins_by_digit[digit].append(box)
+            for digit, boxes in twins_by_digit.items():
+                if len(boxes) == 2:
+                    values = remove_digit_from_same_unit(boxes, digit, unit, values)
+    return values
+
+
+def remove_digit_from_same_unit(boxes, digit, unit, values):
+    for box in unit:
+        if box not in boxes:
+            for number in digit:
+                if number in values[box] and len(values[box]) > 1:
+                    values[box] = values[box].replace(number, '')
     return values
 
 
